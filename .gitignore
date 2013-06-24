@@ -1,0 +1,13 @@
+# Ignore all files
+*
+# except
+!.gitignore
+!ApachePortable.au3
+!ApachePortable.exe
+!ApachePortable.ini
+!README.md
+# and these directories
+![aA]pp/
+![oO]ther/
+![rR]esources/
+![cC]onEmu/

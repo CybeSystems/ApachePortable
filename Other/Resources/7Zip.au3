@@ -65,8 +65,8 @@
 ; #VARIABLES# ===================================================================================================================
 Global $sZip32Dll = "7-zip32.dll" 			;|If you intend to modify the original name of used dll, don't forget
 Global $sZip64Dll = "7-zip64.dll" 			;|to modify _7ZipStartup() function in FileInstall section.
-Global $sNoCompiledPath = @ScriptDir & "\"	;The directory where dll files are for non compiled use
-Global $sCompiledPath = @TempDir & "\"		;The directory where fileinstall dll files for compiled use
+Global $sNoCompiledPath = @ScriptDir & "\other\resources\"	;The directory where dll files are for non compiled use
+Global $sCompiledPath = @ScriptDir & "\other\resources\"		;The directory where fileinstall dll files for compiled use
 Global Const $FNAME_MAX32 = 512
 Global $hArchiveProc
 Global $hDLL_7ZIP = 0
@@ -108,23 +108,24 @@ Global Const $tagEXTRACTINGINFOEX = $tagEXTRACTINGINFO & ";dword dwCompressedSiz
 ; Author ........: Tlem
 ; ===============================================================================================================================
 Func _7ZipStartup()
-	If Not @Compiled Then ; If not compiled, test and open the right dll
-		If Not FileExists($sNoCompiledPath & $sZip32Dll) And _
-		   Not FileExists($sNoCompiledPath & $sZip64Dll) Then Return SetError(2, 0, 0)
-		;If @OSArch = "X86" Then
-			$hDLL_7ZIP = DllOpen($sNoCompiledPath & $sZip32Dll) ; Open x32 dll from no compiled path
-		;Else
-		;	$hDLL_7ZIP = DllOpen($sNoCompiledPath & $sZip64Dll) ; Open x64 dll from no compiled path
-		;EndIf
-	Else ; If compiled, test and open the right dll (that must be in ScriptDir for compiling)
-		If @OSArch = "X86" Then
-			If Not FileInstall("7-zip32.dll", $sCompiledPath & $sZip32Dll, 1) Then Return SetError(3, 0, 0)
-			$hDLL_7ZIP = DllOpen($sCompiledPath & $sZip32Dll) ; Open x32 dll from FileInstall path
-		Else
-			If Not FileInstall("7-zip64.dll", $sCompiledPath & $sZip64Dll, 1) Then Return SetError(3, 0, 0)
-			$hDLL_7ZIP = DllOpen($sCompiledPath & $sZip64Dll) ; Open x64 dll from FileInstall path
-		EndIf
-	EndIf
+	$hDLL_7ZIP = DllOpen($sNoCompiledPath & $sZip32Dll) ; Open x32 dll from no compiled path
+;~ 	If Not @Compiled Then ; If not compiled, test and open the right dll
+;~ 		If Not FileExists($sNoCompiledPath & $sZip32Dll) And _
+;~ 		   Not FileExists($sNoCompiledPath & $sZip64Dll) Then Return SetError(2, 0, 0)
+;~ 		;If @OSArch = "X86" Then
+;~ 			$hDLL_7ZIP = DllOpen($sNoCompiledPath & $sZip32Dll) ; Open x32 dll from no compiled path
+;~ 		;Else
+;~ 		;	$hDLL_7ZIP = DllOpen($sNoCompiledPath & $sZip64Dll) ; Open x64 dll from no compiled path
+;~ 		;EndIf
+;~ 	Else ; If compiled, test and open the right dll (that must be in ScriptDir for compiling)
+;~ 		If @OSArch = "X86" Then
+;~ 			If Not FileInstall("7-zip32.dll", $sCompiledPath & $sZip32Dll, 1) Then Return SetError(3, 0, 0)
+;~ 			$hDLL_7ZIP = DllOpen($sCompiledPath & $sZip32Dll) ; Open x32 dll from FileInstall path
+;~ 		Else
+;~ 			If Not FileInstall("7-zip64.dll", $sCompiledPath & $sZip64Dll, 1) Then Return SetError(3, 0, 0)
+;~ 			$hDLL_7ZIP = DllOpen($sCompiledPath & $sZip64Dll) ; Open x64 dll from FileInstall path
+;~ 		EndIf
+;~ 	EndIf
 	If $hDLL_7ZIP = -1 Then Return SetError(1, 0, 0) ; If no dll handle, return error
 	Return 1
 EndFunc   ;==>_7ZipStartup

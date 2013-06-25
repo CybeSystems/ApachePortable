@@ -17,7 +17,7 @@
 #AutoIt3Wrapper_Res_Icon_Add=other/resources/network.ico
 #AutoIt3Wrapper_Res_Icon_Add=other/resources/system_log_out.ico
 #AutoIt3Wrapper_Res_Icon_Add=other/resources/package_utilities.ico
-#AutoIt3Wrapper_Res_File_Add=other/resources/ct_sidebar.bmp, rt_bitmap, CYBETECH_SIDEBAR
+#AutoIt3Wrapper_Res_File_Add=other/resources/cs_sidebar.bmp, rt_bitmap, CYBETECH_SIDEBAR
 #endregion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #region AutoIt3Wrapper directives section
 ;===============================================================================================================
@@ -48,12 +48,7 @@
 #include "other\resources\7Zip.au3"
 #include "other\resources\_InetGetGUI.au3"
 
-Global $szDrive, $szDir, $szFName, $szExt, $cygdrive, $cygfolder, $cygfolder1, $cygfile, $executableExtension, $executable, $exitAfterExec, $setContextMenu, $cygwinUsername, $cygwinTrayMenu, $shell, $cygwinNoMsgBox, $cygwinMirror, $cygwinPortsMirror, $cygwinFirstInstallAdditions
-Global $xamppFirstInstallDeleteUnneeded, $cygwinDeleteInstallation, $installUnofficial, $ApacheFirstInstallDeleteUnneededFiles, $tray_openApachePortableConfig, $WindowsPathToApache, $windowsAdditionalPath, $windowsPythonPath
-Global $WS_GROUP, $BackupDir
-Global $tray_ReStartApache, $tray_phpMyAdmin, $AppsStopped, $tray_TrayExit, $tray_menu_seperator, $tray_menu_seperator2, $nSideItem3, $nTrayIcon1, $nTrayMenu1
-Global $CYBESYSTEMSPATH, $CYBESYSTEMSPARENTPATH, $ApacheDataDir, $ApacheAppDir
-Global $szDrive, $szDir, $szFName, $szExt, $WindowsPathToApache
+Global $XamppMirror, $XamppFileName, $ApacheFirstInstallDeleteUnneeded, $ApacheFirstInstallDeleteUnneededFiles, $WindowsPathToApache, $XamppDeleteUneededFolders, $XamppUneededFolders
 
 $AppDir = @ScriptDir & "\App"
 $OtherDir = @ScriptDir & "\Other"
@@ -66,43 +61,71 @@ $CYBESYSTEMSPARENTPATH = "$CYBESYSTEMSPARENTPATH"
 $ApacheAppDir = StringReplace($AppDir, "\", "/")
 $ApacheDataDir = StringReplace(@ScriptDir & "\Data", "\", "/")
 
-_PathSplit(@ScriptDir, $szDrive, $szDir, $szFName, $szExt)
-If $WindowsPathToApache == True Then
-	$path = EnvGet("PATH")
-	If StringRight($path, 1) <> ";" Then
-		$path &= ";"
-	EndIf
-	EnvSet("PATH", $path & @ScriptDir & "\cygwin\")
-Else
-	EnvSet("PATH", @ScriptDir & "\cygwin\")
-EndIf
-
-
-;~ If $CmdLine[0] == 2 And $CmdLine[2] == 'cybesystemsapp' Then
-;~ 	$ApacheDataDir = StringReplace(StringLeft(@ScriptDir, StringInStr(@ScriptDir, "\", 0, -1)), "\", "/")
-;~ 	ConsoleWrite($ApacheDataDir)
-;~ Else
-;~ 	;$ApacheDataDir = StringReplace(@ScriptDir, "\", "/")
-;~ 	$ApacheDataDir = $ApacheAppDir
-;~ 	ConsoleWrite($ApacheDataDir)
-;~ EndIf
-
 Local $iniMain = IniReadSection(@ScriptDir & "\ApachePortable.ini", "Main")
 Local $iniFile = @ScriptDir & "\ApachePortable.ini"
 If @error Then
 	MsgBox(4096, "", "ApachePortable.ini not found")
+	Exit
 Else
 	ReadSettings()
+	ReadCmdLineParams()
+	CheckExistingInstallation()
 EndIf
 
+Func CheckExistingInstallation()
+	If FileExists($TempDir) Then
+		DirRemove($TempDir, 1)
+		DirCreate($TempDir)
+	EndIf
+
+	If Not FileExists($AppDir & "\apache") Then
+ 		If Not FileExists($TempDir & "\" & $XamppFileName) Then
+ 			DownloadSetup()
+ 		EndIf
+
+ 		If FileExists($TempDir & "\" & $XamppFileName) Then
+
+ 			$ArcFile = $TempDir & "\" & $XamppFileName
+			If @error Then Exit
+
+			$Output = $TempDir
+			If @error Then Exit
+
+			$retResult = _7ZipExtractEx(0, $ArcFile, $Output)
+			If @error = 0 Then
+				CybeTechMoveFolders()
+				CybeTechRebuildPath()
+			EndIf
+		EndIf
+	Else
+		CybeTechRebuildPath()
+	EndIf
+EndFunc
+
 Func ReadSettings()
-	Global $XamppMirror, $XamppFileName, $ApacheFirstInstallDeleteUnneeded, $ApacheFirstInstallDeleteUnneededFiles, $WindowsPathToApache
 	$XamppMirror = IniRead($iniFile, "Main", "XamppMirror", "http://www.cybesystems.com/")
 	$XamppFileName = IniRead($iniFile, "Main", "XamppFileName", "xampp-portable-lite-win32-1.8.1-VC9.7z")
+	$XamppDeleteUneededFolders = IniRead($iniFile, "Main", "XamppDeleteUneededFolders", True)
+	$XamppUneededFolders = IniRead($iniFile, "Main", "XamppUneededFolders", "")
+
 	$ApacheFirstInstallDeleteUnneeded = IniRead($iniFile, "Main", "ApacheFirstInstallDeleteUnneeded", False)
 	$ApacheFirstInstallDeleteUnneededFiles = IniRead($iniFile, "Main", "ApacheFirstInstallDeleteUnneededFiles", False)
 	$WindowsPathToApache = IniRead($iniFile, "Main", "WindowsPathToCygwin", True)
 EndFunc   ;==>ReadSettings
+
+Func GetWindowsPath()
+	Global $szDrive, $szDir, $szFName, $szExt, $WindowsPathToApache
+	_PathSplit(@ScriptDir, $szDrive, $szDir, $szFName, $szExt)
+	If $WindowsPathToApache == True Then
+		$path = EnvGet("PATH")
+		If StringRight($path, 1) <> ";" Then
+			$path &= ";"
+		EndIf
+		EnvSet("PATH", $path & @ScriptDir & "\cygwin\")
+	Else
+		EnvSet("PATH", @ScriptDir & "\cygwin\")
+	EndIf
+EndFunc
 
 Func Bool(Const ByRef $checkbox)
 	If GUICtrlRead($checkbox) = $GUI_CHECKED Then
@@ -112,69 +135,28 @@ Func Bool(Const ByRef $checkbox)
 	EndIf
 EndFunc   ;==>Bool
 
-
-
-
-If FileExists($TempDir) Then
-	DirRemove($TempDir, 1)
-	DirCreate($TempDir)
-EndIf
-
-If Not FileExists($AppDir & "\apache") Then
-
-	If Not FileExists($TempDir & "\" & $XamppFileName) Then
-		DownloadSetup()
-	EndIf
-
-	If FileExists($TempDir & "\" & $XamppFileName) Then
-		$ArcFile = $TempDir & "\" & $XamppFileName
-		If @error Then Exit
-
-		$Output = $TempDir
-		If @error Then Exit
-
-		$retResult = _7ZipExtractEx(0, $ArcFile, $Output)
-		If @error = 0 Then
-	;~ 		CybeTechMoveOriginals()
-			CybeTechMoveFolders()
-			CybeTechRebuildPath()
-	;~ 		If not DirMove(@ScriptDir & "\App\ApachePortable\temp\xampp\*",@ScriptDir ,1) then
-	;~ 			msgbox(0,"Error","FileMove failed!")
-	;~ 			exit(1)
-	;~ 		endIf
-		EndIf
-	EndIf
-Else
-	CybeTechRebuildPath()
-EndIf
-
-
 Func CybeTechMoveFolders()
 	DirMove($TempDir & "\xampp\apache", $AppDir, 1)
-	DirMove($TempDir & "\xampp\cgi-bin", $AppDir, 1)
+	DirMove($TempDir & "\xampp\cgi-bin", $ApacheDataDir & "\cgi-bin", 1)
 	DirMove($TempDir & "\xampp\contrib", $AppDir, 1)
 	DirMove($TempDir & "\xampp\install", $AppDir, 1)
 	DirMove($TempDir & "\xampp\licenses", $AppDir, 1)
 	DirMove($TempDir & "\xampp\locale", $AppDir, 1)
 	DirMove($TempDir & "\xampp\mailoutput", $AppDir, 1)
 	DirMove($TempDir & "\xampp\mailtodisk", $AppDir, 1)
-	DirMove($TempDir & "\xampp\security", $AppDir, 1)
+	DirMove($TempDir & "\xampp\security", $ApacheDataDir & "\security", 1)
 	DirMove($TempDir & "\xampp\sendmail", $AppDir, 1)
 	DirMove($TempDir & "\xampp\htdocs", $ApacheDataDir, 1)
 	DirMove($TempDir & "\xampp\mysql", $AppDir, 1)
 	DirMove($TempDir & "\xampp\perl", $AppDir, 1)
 	DirMove($TempDir & "\xampp\php", $AppDir, 1)
-	DirMove($TempDir & "\xampp\phpMyAdmin", $ApacheDataDir & "\htdocs", 1)
+	DirMove($TempDir & "\xampp\phpMyAdmin", $ApacheDataDir & "\htdocs\phpMyAdmin", 1)
 	DirMove($TempDir & "\xampp\webdav", $AppDir, 1)
 	DirMove($TempDir & "\xampp\php", $AppDir, 1)
 	DirMove($TempDir & "\xampp\tmp", $AppDir, 1)
 EndFunc   ;==>CybeTechMoveFolders
 
 Func CybeTechRebuildPath()
-
-	;------------------------------------------------------------------------------------------------------------------------
-	;CybeSystems - LightTPD Config schreiben -> Portabel machen bzw. neuen Pfad erkennen, falls umkopiert
-	;------------------------------------------------------------------------------------------------------------------------
 
 	FileDelete($AppDir & "\apache\conf\httpd.conf")
 	FileDelete($AppDir & "\apache\conf\extra\httpd-ajp.conf")
@@ -286,9 +268,7 @@ Func ReStartApache()
 	EndIf
 EndFunc   ;==>MMOwningBuildTrayMenu
 
-ReadCmdLineParams()
-
-Global $tray_ReStartApache, $tray_openbash, $AppsStopped, $tray_TrayExit, $tray_menu_seperator, $tray_menu_seperator2, $nSideItem3, $nTrayIcon1, $nTrayMenu1, $tray_openCygwinConfig, $tray_sub_QuickLaunch, $tray_sub_Drives, $tray_sub_QuickLink, $tray_menu_seperator_quick_launch, $tray_openXServer, $tray_openCygwinConfigPorts
+Global $tray_ReStartApache, $tray_phpMyAdmin, $tray_TrayExit, $tray_menu_seperator, $tray_menu_seperator2, $nSideItem3, $nTrayIcon1, $nTrayMenu1
 
 If $CmdLine[0] == 0 And Not _Singleton("ApachePortable.exe", 1) = 0 Then
 	BuildTrayMenu()

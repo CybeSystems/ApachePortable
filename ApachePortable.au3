@@ -1,23 +1,23 @@
 #NoTrayIcon
 #region ;**** Directives created by AutoIt3Wrapper_GUI ****
-#AutoIt3Wrapper_icon=resources/apache2.ico
+#AutoIt3Wrapper_icon=other/resources/apache2.ico
 #AutoIt3Wrapper_UseUpx=N
 #AutoIt3Wrapper_Res_Description=CybeSystems
 #AutoIt3Wrapper_Res_Fileversion=0.8.0.0
 #AutoIt3Wrapper_Res_ProductVersion=0.8
 #AutoIt3Wrapper_Res_LegalCopyright=Thiemo Borger
 #AutoIt3Wrapper_Res_Language=1031
-#AutoIt3Wrapper_Res_Icon_Add=resources/plus.ico
-#AutoIt3Wrapper_Res_Icon_Add=resources/view_refresh.ico
-#AutoIt3Wrapper_Res_Icon_Add=resources/window_close.ico
-#AutoIt3Wrapper_Res_Icon_Add=resources/preferences_desktop_display.ico
-#AutoIt3Wrapper_Res_Icon_Add=resources/applications_development.ico
-#AutoIt3Wrapper_Res_Icon_Add=resources/help_about.ico
-#AutoIt3Wrapper_Res_Icon_Add=resources/messagebox_info.ico
-#AutoIt3Wrapper_Res_Icon_Add=resources/network.ico
-#AutoIt3Wrapper_Res_Icon_Add=resources/system_log_out.ico
-#AutoIt3Wrapper_Res_Icon_Add=resources/package_utilities.ico
-#AutoIt3Wrapper_Res_File_Add=resources/ct_sidebar.bmp, rt_bitmap, CYBETECH_SIDEBAR
+#AutoIt3Wrapper_Res_Icon_Add=other/resources/plus.ico
+#AutoIt3Wrapper_Res_Icon_Add=other/resources/view_refresh.ico
+#AutoIt3Wrapper_Res_Icon_Add=other/resources/window_close.ico
+#AutoIt3Wrapper_Res_Icon_Add=other/resources/preferences_desktop_display.ico
+#AutoIt3Wrapper_Res_Icon_Add=other/resources/applications_development.ico
+#AutoIt3Wrapper_Res_Icon_Add=other/resources/help_about.ico
+#AutoIt3Wrapper_Res_Icon_Add=other/resources/messagebox_info.ico
+#AutoIt3Wrapper_Res_Icon_Add=other/resources/network.ico
+#AutoIt3Wrapper_Res_Icon_Add=other/resources/system_log_out.ico
+#AutoIt3Wrapper_Res_Icon_Add=other/resources/package_utilities.ico
+#AutoIt3Wrapper_Res_File_Add=other/resources/ct_sidebar.bmp, rt_bitmap, CYBETECH_SIDEBAR
 #endregion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #region AutoIt3Wrapper directives section
 ;===============================================================================================================
@@ -46,22 +46,25 @@
 #include <StaticConstants.au3>
 #include <Misc.au3>
 #include "other\resources\7Zip.au3"
-
 #include "other\resources\_InetGetGUI.au3"
 
 Global $szDrive, $szDir, $szFName, $szExt, $cygdrive, $cygfolder, $cygfolder1, $cygfile, $executableExtension, $executable, $exitAfterExec, $setContextMenu, $cygwinUsername, $cygwinTrayMenu, $shell, $cygwinNoMsgBox, $cygwinMirror, $cygwinPortsMirror, $cygwinFirstInstallAdditions
 Global $xamppFirstInstallDeleteUnneeded, $cygwinDeleteInstallation, $installUnofficial, $ApacheFirstInstallDeleteUnneededFiles, $tray_openApachePortableConfig, $WindowsPathToApache, $windowsAdditionalPath, $windowsPythonPath
 Global $WS_GROUP, $BackupDir
 Global $tray_ReStartApache, $tray_phpMyAdmin, $AppsStopped, $tray_TrayExit, $tray_menu_seperator, $tray_menu_seperator2, $nSideItem3, $nTrayIcon1, $nTrayMenu1
-Global $CYBESYSTEMSPATH, $CYBESYSTEMSPARENTPATH, $PARENTPATH, $REALPATH
+Global $CYBESYSTEMSPATH, $CYBESYSTEMSPARENTPATH, $ApacheDataDir, $ApacheAppDir
 Global $szDrive, $szDir, $szFName, $szExt, $WindowsPathToApache
 
-
-$BackupDir = @ScriptDir & "\App\ApachePortable\Backup\"
+$AppDir = @ScriptDir & "\App"
+$OtherDir = @ScriptDir & "\Other"
+$BackupDir = $OtherDir & "\Backup"
+$TempDir = $OtherDir & "\Temp"
 
 $CYBESYSTEMSPATH = "$CYBESYSTEMSPATH"
 $CYBESYSTEMSPARENTPATH = "$CYBESYSTEMSPARENTPATH"
-$REALPATH = StringReplace(@ScriptDir, "\", "/")
+
+$ApacheAppDir = StringReplace($AppDir, "\", "/")
+$ApacheDataDir = StringReplace(@ScriptDir & "\Data", "\", "/")
 
 _PathSplit(@ScriptDir, $szDrive, $szDir, $szFName, $szExt)
 If $WindowsPathToApache == True Then
@@ -75,14 +78,14 @@ Else
 EndIf
 
 
-If $CmdLine[0] == 2 And $CmdLine[2] == 'cybesystemsapp' Then
-	$PARENTPATH = StringReplace(StringLeft(@ScriptDir, StringInStr(@ScriptDir, "\", 0, -1)), "\", "/")
-	ConsoleWrite($PARENTPATH)
-Else
-	;$PARENTPATH = StringReplace(@ScriptDir, "\", "/")
-	$PARENTPATH = $REALPATH
-	ConsoleWrite($PARENTPATH)
-EndIf
+;~ If $CmdLine[0] == 2 And $CmdLine[2] == 'cybesystemsapp' Then
+;~ 	$ApacheDataDir = StringReplace(StringLeft(@ScriptDir, StringInStr(@ScriptDir, "\", 0, -1)), "\", "/")
+;~ 	ConsoleWrite($ApacheDataDir)
+;~ Else
+;~ 	;$ApacheDataDir = StringReplace(@ScriptDir, "\", "/")
+;~ 	$ApacheDataDir = $ApacheAppDir
+;~ 	ConsoleWrite($ApacheDataDir)
+;~ EndIf
 
 Local $iniMain = IniReadSection(@ScriptDir & "\ApachePortable.ini", "Main")
 Local $iniFile = @ScriptDir & "\ApachePortable.ini"
@@ -110,20 +113,24 @@ Func Bool(Const ByRef $checkbox)
 EndFunc   ;==>Bool
 
 
-If Not FileExists(@ScriptDir & "\App\ApachePortable\" & $XamppFileName) Then
-	DownloadSetup()
+
+
+If FileExists($TempDir) Then
+	DirRemove($TempDir, 1)
+	DirCreate($TempDir)
 EndIf
 
-If FileExists(@ScriptDir & "\App\ApachePortable\temp") Then
-	DirRemove(@ScriptDir & "\App\ApachePortable\temp", 1)
-EndIf
+If Not FileExists($AppDir & "\apache") Then
 
-If Not FileExists(@ScriptDir & "\apache") Then
-	If FileExists(@ScriptDir & "\App\ApachePortable\" & $XamppFileName) Then
-		$ArcFile = @ScriptDir & "\App\ApachePortable\" & $XamppFileName
+	If Not FileExists($TempDir & "\" & $XamppFileName) Then
+		DownloadSetup()
+	EndIf
+
+	If FileExists($TempDir & "\" & $XamppFileName) Then
+		$ArcFile = $TempDir & "\" & $XamppFileName
 		If @error Then Exit
 
-		$Output = @ScriptDir & "\App\ApachePortable\temp"
+		$Output = $TempDir
 		If @error Then Exit
 
 		$retResult = _7ZipExtractEx(0, $ArcFile, $Output)
@@ -143,61 +150,25 @@ EndIf
 
 
 Func CybeTechMoveFolders()
-	DirMove(@ScriptDir & "\App\ApachePortable\temp\xampp\apache", @ScriptDir, 1)
-	DirMove(@ScriptDir & "\App\ApachePortable\temp\xampp\cgi-bin", @ScriptDir, 1)
-	DirMove(@ScriptDir & "\App\ApachePortable\temp\xampp\htdocs", @ScriptDir, 1)
-	DirMove(@ScriptDir & "\App\ApachePortable\temp\xampp\mysql", @ScriptDir, 1)
-	DirMove(@ScriptDir & "\App\ApachePortable\temp\xampp\perl", @ScriptDir, 1)
-	DirMove(@ScriptDir & "\App\ApachePortable\temp\xampp\php", @ScriptDir, 1)
-	DirMove(@ScriptDir & "\App\ApachePortable\temp\xampp\phpMyAdmin", @ScriptDir & "\htdocs", 1)
-	DirMove(@ScriptDir & "\App\ApachePortable\temp\xampp\webdav", @ScriptDir, 1)
-	DirMove(@ScriptDir & "\App\ApachePortable\temp\xampp\php", @ScriptDir, 1)
-	DirMove(@ScriptDir & "\App\ApachePortable\temp\xampp\tmp", @ScriptDir, 1)
+	DirMove($TempDir & "\xampp\apache", $AppDir, 1)
+	DirMove($TempDir & "\xampp\cgi-bin", $AppDir, 1)
+	DirMove($TempDir & "\xampp\contrib", $AppDir, 1)
+	DirMove($TempDir & "\xampp\install", $AppDir, 1)
+	DirMove($TempDir & "\xampp\licenses", $AppDir, 1)
+	DirMove($TempDir & "\xampp\locale", $AppDir, 1)
+	DirMove($TempDir & "\xampp\mailoutput", $AppDir, 1)
+	DirMove($TempDir & "\xampp\mailtodisk", $AppDir, 1)
+	DirMove($TempDir & "\xampp\security", $AppDir, 1)
+	DirMove($TempDir & "\xampp\sendmail", $AppDir, 1)
+	DirMove($TempDir & "\xampp\htdocs", $ApacheDataDir, 1)
+	DirMove($TempDir & "\xampp\mysql", $AppDir, 1)
+	DirMove($TempDir & "\xampp\perl", $AppDir, 1)
+	DirMove($TempDir & "\xampp\php", $AppDir, 1)
+	DirMove($TempDir & "\xampp\phpMyAdmin", $ApacheDataDir & "\htdocs", 1)
+	DirMove($TempDir & "\xampp\webdav", $AppDir, 1)
+	DirMove($TempDir & "\xampp\php", $AppDir, 1)
+	DirMove($TempDir & "\xampp\tmp", $AppDir, 1)
 EndFunc   ;==>CybeTechMoveFolders
-
-Func CybeTechMoveOriginals()
-	DirRemove($BackupDir, 1)
-	DirCreate($BackupDir)
-	DirCreate($BackupDir & "\apache\conf\")
-	DirCreate($BackupDir & "\apache\conf\extra\")
-	DirCreate($BackupDir & "\php\")
-
-	For $iniMainValue = 1 To $iniMain[0][0]
-		;ConsoleWrite($iniMain[$iniMainValue][0])
-		;Is the selected file executable ?
-		If $iniMain[$iniMainValue][0] == 'ApacheFirstInstallDeleteUnneededFiles' Then
-			$ApacheFirstInstallDeleteUnneededFiles = StringSplit($iniMain[$iniMainValue][1], ",")
-
-			For $iniMainExecutableExtensionArray = 1 To UBound($ApacheFirstInstallDeleteUnneededFiles, 1) - 1
-
-				;FileDelete (@ScriptDir & "\App\ApachePortable\CygwinConfig.exe")
-				;DirRemove ( @ScriptDir & "\" & $ApacheFirstInstallDeleteUnneededFiles[$iniMainExecutableExtensionArray], 1)
-				If Not FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\" & $ApacheFirstInstallDeleteUnneededFiles[$iniMainExecutableExtensionArray], $BackupDir & $ApacheFirstInstallDeleteUnneededFiles[$iniMainExecutableExtensionArray]) Then
-					;msgbox(0,"Error","FileMove " & @ScriptDir & "\App\ApachePortable\temp\xampp\" & $ApacheFirstInstallDeleteUnneededFiles[$iniMainExecutableExtensionArray] & " failed!")
-					;exit(1)
-				EndIf
-			Next
-		EndIf
-	Next
-
-	FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\apache\conf\httpd.conf", $BackupDir & "\apache\conf\httpd.conf")
-	FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\apache\conf\extra\httpd-ajp.conf", $BackupDir & "\apache\conf\extra\httpd-ajp.conf")
-	FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\apache\conf\extra\httpd-default.conf", $BackupDir & "\apache\conf\extra\httpd-default.conf")
-	FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\apache\conf\extra\httpd-autoindex.conf", $BackupDir & "\apache\conf\extra\httpd-autoindex.conf")
-	FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\apache\conf\extra\httpd-dav.conf", $BackupDir & "\apache\conf\extra\httpd-dav.conf")
-	FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\apache\conf\extra\httpd-info.conf", $BackupDir & "\apache\conf\extra\httpd-info.conf")
-	FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\apache\conf\extra\httpd-languages.conf", $BackupDir & "\apache\conf\extra\httpd-languages.conf")
-	FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\apache\conf\extra\httpd-mpm.conf", $BackupDir & "\apache\conf\extra\httpd-mpm.conf")
-	FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\apache\conf\extra\httpd-multilang-errordoc.conf", $BackupDir & "\apache\conf\extra\httpd-multilang-errordoc.conf")
-	FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\apache\conf\extra\httpd-proxy.conf", $BackupDir & "\apache\conf\extra\httpd-proxy.conf")
-	FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\apache\conf\extra\httpd-ssl.conf", $BackupDir & "\apache\conf\extra\httpd-ssl.conf")
-	FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\apache\conf\extra\httpd-userdir.conf", $BackupDir & "\apache\conf\extra\httpd-userdir.conf")
-	FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\apache\conf\extra\httpd-vhosts.conf", $BackupDir & "\apache\conf\extra\httpd-vhosts.conf")
-	FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\apache\conf\extra\httpd-xampp.conf", $BackupDir & "\apache\conf\extra\httpd-xampp.conf")
-	FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\apache\conf\extra\httpd-html.conf", $BackupDir & "\apache\conf\extra\httpd-html.conf")
-	FileMove(@ScriptDir & "\App\ApachePortable\temp\xampp\php\php.ini", $BackupDir & "\php\php.ini")
-EndFunc   ;==>CybeTechMoveOriginals
-
 
 Func CybeTechRebuildPath()
 
@@ -205,73 +176,73 @@ Func CybeTechRebuildPath()
 	;CybeSystems - LightTPD Config schreiben -> Portabel machen bzw. neuen Pfad erkennen, falls umkopiert
 	;------------------------------------------------------------------------------------------------------------------------
 
-	FileDelete(@ScriptDir & "\apache\conf\httpd.conf")
-	FileDelete(@ScriptDir & "\apache\conf\extra\httpd-ajp.conf")
-	FileDelete(@ScriptDir & "\apache\conf\extra\httpd-autoindex.conf")
-	FileDelete(@ScriptDir & "\apache\conf\extra\httpd-dav.conf")
-	FileDelete(@ScriptDir & "\apache\conf\extra\httpd-default.conf")
-	FileDelete(@ScriptDir & "\apache\conf\extra\httpd-info.conf")
-	FileDelete(@ScriptDir & "\apache\conf\extra\httpd-languages.conf")
-	FileDelete(@ScriptDir & "\apache\conf\extra\httpd-mpm.conf")
-	FileDelete(@ScriptDir & "\apache\conf\extra\httpd-multilang-errordoc.conf")
-	FileDelete(@ScriptDir & "\apache\conf\extra\httpd-proxy.conf")
-	FileDelete(@ScriptDir & "\apache\conf\extra\httpd-ssl.conf")
-	FileDelete(@ScriptDir & "\apache\conf\extra\httpd-userdir.conf")
-	FileDelete(@ScriptDir & "\apache\conf\extra\httpd-vhosts.conf")
-	FileDelete(@ScriptDir & "\apache\conf\extra\httpd-xampp.conf")
-	FileDelete(@ScriptDir & "\apache\conf\extra\proxy-html.conf")
-	FileDelete(@ScriptDir & "\php\php.ini")
+	FileDelete($AppDir & "\apache\conf\httpd.conf")
+	FileDelete($AppDir & "\apache\conf\extra\httpd-ajp.conf")
+	FileDelete($AppDir & "\apache\conf\extra\httpd-autoindex.conf")
+	FileDelete($AppDir & "\apache\conf\extra\httpd-dav.conf")
+	FileDelete($AppDir & "\apache\conf\extra\httpd-default.conf")
+	FileDelete($AppDir & "\apache\conf\extra\httpd-info.conf")
+	FileDelete($AppDir & "\apache\conf\extra\httpd-languages.conf")
+	FileDelete($AppDir & "\apache\conf\extra\httpd-mpm.conf")
+	FileDelete($AppDir & "\apache\conf\extra\httpd-multilang-errordoc.conf")
+	FileDelete($AppDir & "\apache\conf\extra\httpd-proxy.conf")
+	FileDelete($AppDir & "\apache\conf\extra\httpd-ssl.conf")
+	FileDelete($AppDir & "\apache\conf\extra\httpd-userdir.conf")
+	FileDelete($AppDir & "\apache\conf\extra\httpd-vhosts.conf")
+	FileDelete($AppDir & "\apache\conf\extra\httpd-xampp.conf")
+	FileDelete($AppDir & "\apache\conf\extra\proxy-html.conf")
+	FileDelete($AppDir & "\php\php.ini")
 
-	FileCopy(@ScriptDir & "\App\Configs\httpd.conf.dist", @ScriptDir & "\apache\conf\httpd.conf")
-	FileCopy(@ScriptDir & "\App\Configs\httpd-ajp.conf.dist", @ScriptDir & "\apache\conf\extra\httpd-ajp.conf")
-	FileCopy(@ScriptDir & "\App\Configs\httpd-autoindex.conf.dist", @ScriptDir & "\apache\conf\extra\httpd-autoindex.conf")
-	FileCopy(@ScriptDir & "\App\Configs\httpd-dav.conf.dist", @ScriptDir & "\apache\conf\extra\httpd-dav.conf")
-	FileCopy(@ScriptDir & "\App\Configs\httpd-default.conf.dist", @ScriptDir & "\apache\conf\extra\httpd-default.conf")
-	FileCopy(@ScriptDir & "\App\Configs\httpd-info.conf.dist", @ScriptDir & "\apache\conf\extra\httpd-info.conf")
-	FileCopy(@ScriptDir & "\App\Configs\httpd-languages.conf.dist", @ScriptDir & "\apache\conf\extra\httpd-languages.conf")
-	FileCopy(@ScriptDir & "\App\Configs\httpd-mpm.conf.dist", @ScriptDir & "\apache\conf\extra\httpd-mpm.conf")
-	FileCopy(@ScriptDir & "\App\Configs\httpd-multilang-errordoc.conf.dist", @ScriptDir & "\apache\conf\extra\httpd-multilang-errordoc.conf")
-	FileCopy(@ScriptDir & "\App\Configs\httpd-proxy.conf.dist", @ScriptDir & "\apache\conf\extra\httpd-proxy.conf")
-	FileCopy(@ScriptDir & "\App\Configs\httpd-ssl.conf.dist", @ScriptDir & "\apache\conf\extra\httpd-ssl.conf")
-	FileCopy(@ScriptDir & "\App\Configs\httpd-userdir.conf.dist", @ScriptDir & "\apache\conf\extra\httpd-userdir.conf")
-	FileCopy(@ScriptDir & "\App\Configs\httpd-vhosts.conf.dist", @ScriptDir & "\apache\conf\extra\httpd-vhosts.conf")
-	FileCopy(@ScriptDir & "\App\Configs\httpd-xampp.conf.dist", @ScriptDir & "\apache\conf\extra\httpd-xampp.conf")
-	FileCopy(@ScriptDir & "\App\Configs\proxy-html.conf.dist", @ScriptDir & "\apache\conf\extra\proxy-html.conf")
-	FileCopy(@ScriptDir & "\App\Configs\php.ini.dist", @ScriptDir & "\php\php.ini")
+	FileCopy($OtherDir & "\Configs\httpd.conf.dist", $AppDir & "\apache\conf\httpd.conf")
+	FileCopy($OtherDir & "\Configs\httpd-ajp.conf.dist", $AppDir & "\apache\conf\extra\httpd-ajp.conf")
+	FileCopy($OtherDir & "\Configs\httpd-autoindex.conf.dist", $AppDir & "\apache\conf\extra\httpd-autoindex.conf")
+	FileCopy($OtherDir & "\Configs\httpd-dav.conf.dist", $AppDir & "\apache\conf\extra\httpd-dav.conf")
+	FileCopy($OtherDir & "\Configs\httpd-default.conf.dist", $AppDir & "\apache\conf\extra\httpd-default.conf")
+	FileCopy($OtherDir & "\Configs\httpd-info.conf.dist", $AppDir & "\apache\conf\extra\httpd-info.conf")
+	FileCopy($OtherDir & "\Configs\httpd-languages.conf.dist", $AppDir & "\apache\conf\extra\httpd-languages.conf")
+	FileCopy($OtherDir & "\Configs\httpd-mpm.conf.dist", $AppDir & "\apache\conf\extra\httpd-mpm.conf")
+	FileCopy($OtherDir & "\Configs\httpd-multilang-errordoc.conf.dist", $AppDir & "\apache\conf\extra\httpd-multilang-errordoc.conf")
+	FileCopy($OtherDir & "\Configs\httpd-proxy.conf.dist", $AppDir & "\apache\conf\extra\httpd-proxy.conf")
+	FileCopy($OtherDir & "\Configs\httpd-ssl.conf.dist", $AppDir & "\apache\conf\extra\httpd-ssl.conf")
+	FileCopy($OtherDir & "\Configs\httpd-userdir.conf.dist", $AppDir & "\apache\conf\extra\httpd-userdir.conf")
+	FileCopy($OtherDir & "\Configs\httpd-vhosts.conf.dist", $AppDir & "\apache\conf\extra\httpd-vhosts.conf")
+	FileCopy($OtherDir & "\Configs\httpd-xampp.conf.dist", $AppDir & "\apache\conf\extra\httpd-xampp.conf")
+	FileCopy($OtherDir & "\Configs\proxy-html.conf.dist", $AppDir & "\apache\conf\extra\proxy-html.conf")
+	FileCopy($OtherDir & "\Configs\php.ini.dist", $AppDir & "\php\php.ini")
 
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\httpd.conf", $CYBESYSTEMSPATH, $REALPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-ajp.conf", $CYBESYSTEMSPATH, $REALPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-autoindex.conf", $CYBESYSTEMSPATH, $REALPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-dav.conf", $CYBESYSTEMSPATH, $REALPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-default.conf", $CYBESYSTEMSPATH, $REALPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-info.conf", $CYBESYSTEMSPATH, $REALPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-languages.conf", $CYBESYSTEMSPATH, $REALPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-mpm.conf", $CYBESYSTEMSPATH, $REALPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-multilang-errordoc.conf", $CYBESYSTEMSPATH, $REALPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-proxy.conf", $CYBESYSTEMSPATH, $REALPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-ssl.conf", $CYBESYSTEMSPATH, $REALPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-userdir.conf", $CYBESYSTEMSPATH, $REALPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-vhosts.conf", $CYBESYSTEMSPATH, $REALPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-xampp.conf", $CYBESYSTEMSPATH, $REALPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-html.conf", $CYBESYSTEMSPATH, $REALPATH)
-	_ReplaceStringInFile(@ScriptDir & "\php\php.ini", $CYBESYSTEMSPATH, $REALPATH)
+	_ReplaceStringInFile($AppDir & "\apache\conf\httpd.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-ajp.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-autoindex.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-dav.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-default.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-info.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-languages.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-mpm.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-multilang-errordoc.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-proxy.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-ssl.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-userdir.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-vhosts.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-xampp.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-html.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+	_ReplaceStringInFile($AppDir & "\php\php.ini", $CYBESYSTEMSPATH, $ApacheAppDir)
 
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\httpd.conf", $CYBESYSTEMSPARENTPATH, $PARENTPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-ajp.conf", $CYBESYSTEMSPARENTPATH, $PARENTPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-autoindex.conf", $CYBESYSTEMSPARENTPATH, $PARENTPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-dav.conf", $CYBESYSTEMSPARENTPATH, $PARENTPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-default.conf", $CYBESYSTEMSPARENTPATH, $PARENTPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-info.conf", $CYBESYSTEMSPARENTPATH, $PARENTPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-languages.conf", $CYBESYSTEMSPARENTPATH, $PARENTPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-mpm.conf", $CYBESYSTEMSPARENTPATH, $PARENTPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-multilang-errordoc.conf", $CYBESYSTEMSPARENTPATH, $PARENTPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-proxy.conf", $CYBESYSTEMSPARENTPATH, $PARENTPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-ssl.conf", $CYBESYSTEMSPARENTPATH, $PARENTPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-userdir.conf", $CYBESYSTEMSPARENTPATH, $PARENTPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-vhosts.conf", $CYBESYSTEMSPARENTPATH, $PARENTPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-xampp.conf", $CYBESYSTEMSPARENTPATH, $PARENTPATH)
-	_ReplaceStringInFile(@ScriptDir & "\apache\conf\extra\httpd-html.conf", $CYBESYSTEMSPARENTPATH, $PARENTPATH)
-	_ReplaceStringInFile(@ScriptDir & "\php\php.ini", $CYBESYSTEMSPARENTPATH, $PARENTPATH)
+	_ReplaceStringInFile($AppDir & "\apache\conf\httpd.conf", $CYBESYSTEMSPARENTPATH, $ApacheDataDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-ajp.conf", $CYBESYSTEMSPARENTPATH, $ApacheDataDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-autoindex.conf", $CYBESYSTEMSPARENTPATH, $ApacheDataDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-dav.conf", $CYBESYSTEMSPARENTPATH, $ApacheDataDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-default.conf", $CYBESYSTEMSPARENTPATH, $ApacheDataDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-info.conf", $CYBESYSTEMSPARENTPATH, $ApacheDataDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-languages.conf", $CYBESYSTEMSPARENTPATH, $ApacheDataDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-mpm.conf", $CYBESYSTEMSPARENTPATH, $ApacheDataDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-multilang-errordoc.conf", $CYBESYSTEMSPARENTPATH, $ApacheDataDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-proxy.conf", $CYBESYSTEMSPARENTPATH, $ApacheDataDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-ssl.conf", $CYBESYSTEMSPARENTPATH, $ApacheDataDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-userdir.conf", $CYBESYSTEMSPARENTPATH, $ApacheDataDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-vhosts.conf", $CYBESYSTEMSPARENTPATH, $ApacheDataDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-xampp.conf", $CYBESYSTEMSPARENTPATH, $ApacheDataDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-html.conf", $CYBESYSTEMSPARENTPATH, $ApacheDataDir)
+	_ReplaceStringInFile($AppDir & "\php\php.ini", $CYBESYSTEMSPARENTPATH, $ApacheDataDir)
 EndFunc   ;==>CybeTechRebuildPath
 
 Func DownloadSetup()
@@ -285,7 +256,7 @@ Func DownloadSetup()
 	GUISetState(@SW_SHOW, $hGUI)
 	Local $downloadSuccess = False
 	While $downloadSuccess == False
-		$sFilePath = _InetGetGUI($sFilePathURL, $iLabel, $iProgressBar, $iButton, @ScriptDir)
+		$sFilePath = _InetGetGUI($sFilePathURL, $iLabel, $iProgressBar, $iButton, $TempDir)
 		If @error Then
 			Switch @extended ; Check what the actual error was by using the @extended command.
 				Case 0
@@ -297,7 +268,7 @@ Func DownloadSetup()
 			EndSwitch
 		Else
 			;MsgBox(64, "Success", "Downloaded >> " & $sFilePath & @CRLF & @CRLF & "Please restart this program")
-			FileMove(@ScriptDir & "\" & $XamppFileName, @ScriptDir & "\" & $XamppFileName, 1)
+;~ 			FileMove(@ScriptDir & "\" & $XamppFileName, @ScriptDir & "\" & $XamppFileName, 1)
 			GUISetState(@SW_HIDE, $hGUI)
 			$downloadSuccess = True
 		EndIf
@@ -310,7 +281,7 @@ Func ReStartApache()
 			ProcessClose("httpd.exe")
 		WEnd
 	Else
-		ShellExecute(@ScriptDir & "\apache\bin\httpd.exe", "", @ScriptDir, "",@SW_HIDE)
+		ShellExecute($AppDir & "\apache\bin\httpd.exe", "", $AppDir, "",@SW_HIDE)
 ;~ 		ShellExecute(@ScriptDir & "\apache\bin\httpd.exe", "", @ScriptDir, "",@SW_SHOW)
 	EndIf
 EndFunc   ;==>MMOwningBuildTrayMenu

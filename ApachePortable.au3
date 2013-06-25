@@ -137,23 +137,31 @@ EndFunc   ;==>Bool
 
 Func CybeTechMoveFolders()
 	DirMove($TempDir & "\xampp\apache", $AppDir, 1)
-	DirMove($TempDir & "\xampp\cgi-bin", $ApacheDataDir & "\cgi-bin", 1)
 	DirMove($TempDir & "\xampp\contrib", $AppDir, 1)
 	DirMove($TempDir & "\xampp\install", $AppDir, 1)
 	DirMove($TempDir & "\xampp\licenses", $AppDir, 1)
 	DirMove($TempDir & "\xampp\locale", $AppDir, 1)
 	DirMove($TempDir & "\xampp\mailoutput", $AppDir, 1)
 	DirMove($TempDir & "\xampp\mailtodisk", $AppDir, 1)
-	DirMove($TempDir & "\xampp\security", $ApacheDataDir & "\security", 1)
 	DirMove($TempDir & "\xampp\sendmail", $AppDir, 1)
 	DirMove($TempDir & "\xampp\htdocs", $ApacheDataDir, 1)
 	DirMove($TempDir & "\xampp\mysql", $AppDir, 1)
 	DirMove($TempDir & "\xampp\perl", $AppDir, 1)
 	DirMove($TempDir & "\xampp\php", $AppDir, 1)
-	DirMove($TempDir & "\xampp\phpMyAdmin", $ApacheDataDir & "\htdocs\phpMyAdmin", 1)
 	DirMove($TempDir & "\xampp\webdav", $AppDir, 1)
 	DirMove($TempDir & "\xampp\php", $AppDir, 1)
 	DirMove($TempDir & "\xampp\tmp", $AppDir, 1)
+	;Dont overwrite data dir if exist
+	If Not FileExists($ApacheDataDir & "\cgi-bin") Then
+		DirMove($TempDir & "\xampp\cgi-bin", $ApacheDataDir & "\cgi-bin", 1)
+	EndIf
+	If Not FileExists($ApacheDataDir & "\security") Then
+		DirMove($TempDir & "\xampp\security", $ApacheDataDir & "\security", 1)
+	EndIf
+	If Not FileExists($ApacheDataDir & "\xampp\phpMyAdmin") Then
+		DirMove($TempDir & "\xampp\phpMyAdmin", $ApacheDataDir & "\htdocs\phpMyAdmin", 1)
+	EndIf
+
 EndFunc   ;==>CybeTechMoveFolders
 
 Func CybeTechRebuildPath()

@@ -54,7 +54,7 @@ ScriptAlias /php-cgi/ "$CYBESYSTEMSPATH/php/"
     </Files>
 </Directory>
 
-<Directory "$CYBESYSTEMSPATH/cgi-bin">
+<Directory "$CYBESYSTEMSPARENTPATH/cgi-bin">
     <FilesMatch "\.php$">
         SetHandler cgi-script
     </FilesMatch>
@@ -63,7 +63,7 @@ ScriptAlias /php-cgi/ "$CYBESYSTEMSPATH/php/"
     </FilesMatch>
 </Directory>
 
-<Directory "$CYBESYSTEMSPATH/htdocs/xampp">
+<Directory "$CYBESYSTEMSPARENTPATH/htdocs/xampp">
     <IfModule php5_module>
     	<Files "status.php">
     		php_admin_flag safe_mode off
@@ -73,8 +73,8 @@ ScriptAlias /php-cgi/ "$CYBESYSTEMSPATH/php/"
 </Directory>
 
 <IfModule alias_module>
-    Alias /security "$CYBESYSTEMSPATH/security/htdocs/"
-    <Directory "$CYBESYSTEMSPATH/security/htdocs">
+    Alias /security "$CYBESYSTEMSPARENTPATH/security/htdocs/"
+    <Directory "$CYBESYSTEMSPARENTPATH/security/htdocs">
         <IfModule php5_module>
     		<Files "xamppsecurity.php">
     			php_admin_flag safe_mode off
@@ -84,8 +84,8 @@ ScriptAlias /php-cgi/ "$CYBESYSTEMSPATH/php/"
         Require all granted
    </Directory>
 
-    Alias /licenses "$CYBESYSTEMSPATH/licenses/"
-    <Directory "$CYBESYSTEMSPATH/licenses">
+    Alias /licenses "$CYBESYSTEMSPARENTPATH/licenses/"
+    <Directory "$CYBESYSTEMSPARENTPATH/licenses">
         Options +Indexes
         <IfModule autoindex_color_module>
             DirectoryIndexTextColor  "#000000"
@@ -97,14 +97,14 @@ ScriptAlias /php-cgi/ "$CYBESYSTEMSPATH/php/"
         Require all granted
    </Directory>
 
-#    Alias /phpmyadmin "$CYBESYSTEMSPATH/phpMyAdmin/"
-#    <Directory "$CYBESYSTEMSPATH/phpMyAdmin">
+#    Alias /phpmyadmin "$CYBESYSTEMSPARENTPATH/phpMyAdmin/"
+#    <Directory "$CYBESYSTEMSPARENTPATH/phpMyAdmin">
 #        AllowOverride AuthConfig
 #        Require all granted
 #    </Directory>
 
-    Alias /webalizer "$CYBESYSTEMSPATH/webalizer/"
-    <Directory "$CYBESYSTEMSPATH/webalizer">
+    Alias /webalizer "$CYBESYSTEMSPARENTPATH/webalizer/"
+    <Directory "$CYBESYSTEMSPARENTPATH/webalizer">
         <IfModule php5_module>
     		<Files "webalizer.php">
     			php_admin_flag safe_mode off

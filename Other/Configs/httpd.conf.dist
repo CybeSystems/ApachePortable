@@ -339,7 +339,7 @@ LogLevel warn
     # client.  The same rules about trailing "/" apply to ScriptAlias
     # directives as to Alias.
     #
-    ScriptAlias /cgi-bin/ "$CYBESYSTEMSPATH/cgi-bin/"
+    ScriptAlias /cgi-bin/ "$CYBESYSTEMSPARENTPATH/cgi-bin/"
 
 </IfModule>
 
@@ -352,10 +352,10 @@ LogLevel warn
 </IfModule>
 
 #
-# "$CYBESYSTEMSPATH/cgi-bin" should be changed to whatever your ScriptAliased
+# "$CYBESYSTEMSPARENTPATH/cgi-bin" should be changed to whatever your ScriptAliased
 # CGI directory exists, if you have that configured.
 #
-<Directory "$CYBESYSTEMSPATH/cgi-bin">
+<Directory "$CYBESYSTEMSPARENTPATH/cgi-bin">
     AllowOverride None
     Options None
     Require all granted

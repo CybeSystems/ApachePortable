@@ -192,7 +192,7 @@ SSLPassPhraseDialog  builtin
     <FilesMatch "\.(cgi|shtml|pl|asp|php)$">
         SSLOptions +StdEnvVars
     </FilesMatch>
-    <Directory "$CYBESYSTEMSPATH/cgi-bin">
+    <Directory "$CYBESYSTEMSPARENTPATH/cgi-bin">
         SSLOptions +StdEnvVars
     </Directory>
     

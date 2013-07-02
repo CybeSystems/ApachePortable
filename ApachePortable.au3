@@ -50,7 +50,7 @@
 
 Global $XamppMirror, $XamppFileName, $ApacheFirstInstallDeleteUnneeded, $ApacheFirstInstallDeleteUnneededFiles, $WindowsPathToApache, $XamppDeleteUneededFolders, $XamppUneededFolders
 
-$AppDir = @ScriptDir & "\App"
+$AppDir = @ScriptDir & "\App\Apache2"
 $OtherDir = @ScriptDir & "\Other"
 $BackupDir = $OtherDir & "\Backup"
 $TempDir = $OtherDir & "\Temp"
@@ -103,14 +103,14 @@ Func CheckExistingInstallation()
 EndFunc
 
 Func ReadSettings()
-	$XamppMirror = IniRead($iniFile, "Main", "XamppMirror", "http://www.cybesystems.com/")
-	$XamppFileName = IniRead($iniFile, "Main", "XamppFileName", "xampp-portable-lite-win32-1.8.1-VC9.7z")
-	$XamppDeleteUneededFolders = IniRead($iniFile, "Main", "XamppDeleteUneededFolders", True)
-	$XamppUneededFolders = IniRead($iniFile, "Main", "XamppUneededFolders", "")
+	$XamppMirror = IniRead($iniFile, "Special", "XamppMirror", "http://www.cybesystems.com/")
+	$XamppFileName = IniRead($iniFile, "Special", "XamppFileName", "xampp-portable-lite-win32-1.8.1-VC9.7z")
+	$XamppDeleteUneededFolders = IniRead($iniFile, "Special", "XamppDeleteUneededFolders", True)
+	$XamppUneededFolders = IniRead($iniFile, "Special", "XamppUneededFolders", "")
 
-	$ApacheFirstInstallDeleteUnneeded = IniRead($iniFile, "Main", "ApacheFirstInstallDeleteUnneeded", False)
-	$ApacheFirstInstallDeleteUnneededFiles = IniRead($iniFile, "Main", "ApacheFirstInstallDeleteUnneededFiles", False)
-	$WindowsPathToApache = IniRead($iniFile, "Main", "WindowsPathToCygwin", True)
+	$ApacheFirstInstallDeleteUnneeded = IniRead($iniFile, "Special", "ApacheFirstInstallDeleteUnneeded", False)
+	$ApacheFirstInstallDeleteUnneededFiles = IniRead($iniFile, "Special", "ApacheFirstInstallDeleteUnneededFiles", False)
+	$WindowsPathToApache = IniRead($iniFile, "Special", "WindowsPathToCygwin", True)
 EndFunc   ;==>ReadSettings
 
 Func GetWindowsPath()
@@ -121,9 +121,9 @@ Func GetWindowsPath()
 		If StringRight($path, 1) <> ";" Then
 			$path &= ";"
 		EndIf
-		EnvSet("PATH", $path & @ScriptDir & "\cygwin\")
+		EnvSet("PATH", $path & $AppDir & "\cygwin\")
 	Else
-		EnvSet("PATH", @ScriptDir & "\cygwin\")
+		EnvSet("PATH", $AppDir & "\cygwin\")
 	EndIf
 EndFunc
 
@@ -279,6 +279,7 @@ EndFunc   ;==>MMOwningBuildTrayMenu
 Global $tray_ReStartApache, $tray_phpMyAdmin, $tray_TrayExit, $tray_menu_seperator, $tray_menu_seperator2, $nSideItem3, $nTrayIcon1, $nTrayMenu1
 
 If $CmdLine[0] == 0 And Not _Singleton("ApachePortable.exe", 1) = 0 Then
+	GetWindowsPath()
 	BuildTrayMenu()
 	BuildMenu()
 	ReStartApache()

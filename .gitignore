@@ -2,9 +2,6 @@
 *
 # except
 !.gitignore
-!ApachePortable.au3
-!ApachePortable.exe
-!ApachePortable.ini
 !Apache2.au3
 !Apache2.exe
 !Apache2.ini

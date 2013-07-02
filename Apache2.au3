@@ -1,6 +1,6 @@
 #NoTrayIcon
 #region ;**** Directives created by AutoIt3Wrapper_GUI ****
-#AutoIt3Wrapper_icon=other/resources/apache2.ico
+#AutoIt3Wrapper_icon=App/AppInfo/appicon.ico
 #AutoIt3Wrapper_UseUpx=N
 #AutoIt3Wrapper_Res_Description=CybeSystems
 #AutoIt3Wrapper_Res_Fileversion=0.8.0.0
@@ -61,10 +61,10 @@ $CYBESYSTEMSPARENTPATH = "$CYBESYSTEMSPARENTPATH"
 $ApacheAppDir = StringReplace($AppDir, "\", "/")
 $ApacheDataDir = StringReplace(@ScriptDir & "\Data", "\", "/")
 
-Local $iniMain = IniReadSection(@ScriptDir & "\ApachePortable.ini", "Main")
-Local $iniFile = @ScriptDir & "\ApachePortable.ini"
+Local $iniMain = IniReadSection(@ScriptDir & "\Apache2.ini", "Special")
+Local $iniFile = @ScriptDir & "\Apache2.ini"
 If @error Then
-	MsgBox(4096, "", "ApachePortable.ini not found")
+	MsgBox(4096, "", "Apache2.ini not found")
 	Exit
 Else
 	ReadSettings()
@@ -278,7 +278,7 @@ EndFunc   ;==>MMOwningBuildTrayMenu
 
 Global $tray_ReStartApache, $tray_phpMyAdmin, $tray_TrayExit, $tray_menu_seperator, $tray_menu_seperator2, $nSideItem3, $nTrayIcon1, $nTrayMenu1
 
-If $CmdLine[0] == 0 And Not _Singleton("ApachePortable.exe", 1) = 0 Then
+If $CmdLine[0] == 0 And Not _Singleton("Apache2.exe", 1) = 0 Then
 	GetWindowsPath()
 	BuildTrayMenu()
 	BuildMenu()
@@ -303,7 +303,7 @@ EndFunc   ;==>DeleteMenu
 
 Func BuildTrayMenu()
 	Opt("GUIOnEventMode", 1)
-	$nTrayIcon1 = _TrayIconCreate("ApachePortable.exe", "ApachePortable.exe", "MMO_ICON")
+	$nTrayIcon1 = _TrayIconCreate("Apache2.exe", "Apache2.exe", "MMO_ICON")
 	$nTrayMenu1 = _TrayCreateContextMenu()
 	$nSideItem3 = _CreateSideMenu($nTrayMenu1)
 	_SetSideMenuText($nSideItem3, "ApachePortable")
@@ -314,7 +314,7 @@ Func BuildTrayMenu()
 	_SetTrayIconBkColor(0xe6e6e6)
 	_SetTraySelectBkColor(0xb5b6b6)
 	_SetTraySelectTextColor(0xffffff)
-	_SetSideMenuImage($nSideItem3, "ApachePortable.exe", "CYBETECH_SIDEBAR")
+	_SetSideMenuImage($nSideItem3, "Apache2.exe", "CYBETECH_SIDEBAR")
 EndFunc   ;==>BuildTrayMenu
 
 Func BuildMenu()
@@ -435,7 +435,7 @@ EndFunc   ;==>ReadCmdLineParams
 
 Func cmdLineHelpMsg()
 	ConsoleWrite('CybeSystems Apache Portable Launcher' & @LF & @LF & _
-			'Syntax:' & @TAB & 'ApachePortable.exe [options]' & @LF & @LF & _
+			'Syntax:' & @TAB & 'Apache2.exe [options]' & @LF & @LF & _
 			'Default:' & @TAB & 'Display help message.' & @LF & @LF & _
 			'Optional Options:' & @LF & _
 			'-path ["path"]' & @TAB & '-path "C:\Windows" open Windows folder' & @LF & _

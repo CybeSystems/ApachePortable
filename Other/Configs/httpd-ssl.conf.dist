@@ -38,7 +38,7 @@
 #
 #Listen 0.0.0.0:443
 #Listen [::]:443
-Listen 443
+Listen $CYBESYSTEMSSSLPORT
 
 ##
 ##  SSL Global Context

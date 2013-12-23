@@ -48,7 +48,7 @@
 #include "other\resources\7Zip.au3"
 #include "other\resources\_InetGetGUI.au3"
 
-Global $XamppMirror, $XamppFileName, $ApacheFirstInstallDeleteUnneeded, $ApacheFirstInstallDeleteUnneededFiles, $WindowsPathToApache, $XamppDeleteUneededFolders, $XamppUneededFolders
+Global $XamppMirror, $XamppFileName, $ApacheFirstInstallDeleteUnneeded, $ApacheFirstInstallDeleteUnneededFiles, $WindowsPathToApache, $XamppDeleteUneededFolders, $XamppUneededFolders, $ApachePort, $ApacheEnableSSL, $ApacheSSLPort
 
 $AppDir = @ScriptDir & "\App\Apache2"
 $OtherDir = @ScriptDir & "\Other"
@@ -57,6 +57,10 @@ $TempDir = $OtherDir & "\Temp"
 
 $CYBESYSTEMSPATH = "$CYBESYSTEMSPATH"
 $CYBESYSTEMSPARENTPATH = "$CYBESYSTEMSPARENTPATH"
+$CYBESYSTEMSSSLPORT = "$CYBESYSTEMSSSLPORT"
+$CYBESYSTEMSPORT = "$CYBESYSTEMSPORT"
+$CYBESYSTEMSSSLPORT = "$CYBESYSTEMSSSLPORT"
+$CYBESYSTEMSENABLESSL = "$CYBESYSTEMSENABLESSL"
 
 $ApacheAppDir = StringReplace($AppDir, "\", "/")
 $ApacheDataDir = StringReplace(@ScriptDir & "\Data", "\", "/")
@@ -107,6 +111,10 @@ Func ReadSettings()
 	$XamppFileName = IniRead($iniFile, "Special", "XamppFileName", "xampp-portable-lite-win32-1.8.1-VC9.7z")
 	$XamppDeleteUneededFolders = IniRead($iniFile, "Special", "XamppDeleteUneededFolders", True)
 	$XamppUneededFolders = IniRead($iniFile, "Special", "XamppUneededFolders", "")
+
+	$ApachePort = IniRead($iniFile, "Special", "ApachePort", "80")
+	$ApacheEnableSSL = IniRead($iniFile, "Special", "ApacheEnableSSL", True)
+	$ApacheSSLPort = IniRead($iniFile, "Special", "ApacheSSLPort", "443")
 
 	$ApacheFirstInstallDeleteUnneeded = IniRead($iniFile, "Special", "ApacheFirstInstallDeleteUnneeded", False)
 	$ApacheFirstInstallDeleteUnneededFiles = IniRead($iniFile, "Special", "ApacheFirstInstallDeleteUnneededFiles", False)
@@ -201,6 +209,15 @@ Func CybeTechRebuildPath()
 	FileCopy($OtherDir & "\Configs\php.ini.dist", $AppDir & "\php\php.ini")
 
 	_ReplaceStringInFile($AppDir & "\apache\conf\httpd.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+
+	if $ApacheEnableSSL == True then
+		_ReplaceStringInFile($AppDir & "\apache\conf\httpd.conf", $CYBESYSTEMSENABLESSL, "LoadModule ssl_module modules/mod_ssl.so")
+	else
+		_ReplaceStringInFile($AppDir & "\apache\conf\httpd.conf", $CYBESYSTEMSENABLESSL, "#LoadModule ssl_module modules/mod_ssl.so")
+	EndIf
+
+	_ReplaceStringInFile($AppDir & "\apache\conf\httpd.conf", $CYBESYSTEMSPORT, $ApachePort)
+
 	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-ajp.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
 	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-autoindex.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
 	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-dav.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
@@ -211,6 +228,8 @@ Func CybeTechRebuildPath()
 	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-multilang-errordoc.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
 	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-proxy.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
 	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-ssl.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
+	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-ssl.conf", $CYBESYSTEMSSSLPORT, $ApacheSSLPort)
+
 	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-userdir.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
 	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-vhosts.conf", $CYBESYSTEMSPATH, $ApacheAppDir)
 	_ReplaceStringInFile($AppDir & "\apache\conf\extra\httpd-xampp.conf", $CYBESYSTEMSPATH, $ApacheAppDir)

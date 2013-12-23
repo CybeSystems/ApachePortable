@@ -44,7 +44,8 @@ ServerRoot "$CYBESYSTEMSPATH/apache"
 #
 #Listen 0.0.0.0:80
 #Listen [::]:80
-Listen 80
+Listen $CYBESYSTEMSPORT
+
 
 # Default charset UTF8
 # AddDefaultCharset utf-8
@@ -130,7 +131,7 @@ LoadModule proxy_ajp_module modules/mod_proxy_ajp.so
 LoadModule rewrite_module modules/mod_rewrite.so
 LoadModule setenvif_module modules/mod_setenvif.so
 #LoadModule speling_module modules/mod_speling.so
-LoadModule ssl_module modules/mod_ssl.so
+$CYBESYSTEMSENABLESSL
 LoadModule status_module modules/mod_status.so
 #LoadModule substitute_module modules/mod_substitute.so
 #LoadModule unique_id_module modules/mod_unique_id.so
